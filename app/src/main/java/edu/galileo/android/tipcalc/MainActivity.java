@@ -14,24 +14,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Date;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import edu.galileo.android.tipcalc.fragments.TipHistoryListFragment;
+import edu.galileo.android.tipcalc.fragments.TipHistoryListFragmentListener;
+import edu.galileo.android.tipcalc.models.TipRecord;
 
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.inputBill)
     EditText inputBill;
-    @BindView(R.id.btnSubmit)
-    Button btnSubmit;
     @BindView(R.id.inputPercentage)
     EditText inputPercentage;
-    @BindView(R.id.btnIncrease)
-    Button btnIncrease;
-    @BindView(R.id.btnDecrease)
-    Button btnDecrease;
-    @BindView(R.id.btnClear)
-    Button btnClear;
     @BindView(R.id.txtTip)
     TextView txtTip;
 
@@ -73,10 +70,14 @@ public class MainActivity extends AppCompatActivity {
         if (!strInputTotal.isEmpty()) {
             double total = Double.parseDouble(strInputTotal);
             int tipPercentage = getTipPercentage();
-            double tip = total * (tipPercentage / 100d);
 
-            String strTip = String.format(getString(R.string.global_message_tip), tip);
-            fragmentListener.action(strTip);
+            TipRecord tipRecord = new TipRecord();
+            tipRecord.setBill(total);
+            tipRecord.setTipPercentage(tipPercentage);
+            tipRecord.setTimeStamp(new Date());
+
+            String strTip = String.format(getString(R.string.global_message_tip), tipRecord.getTip());
+            fragmentListener.addToList(tipRecord);
             txtTip.setVisibility(View.VISIBLE);
             txtTip.setText(strTip);
         }
@@ -92,6 +93,11 @@ public class MainActivity extends AppCompatActivity {
     public void handleClickDecrease() {
         hideKeyboard();
         handleTipChange(-TIP_STEP_CHANGE);
+    }
+
+    @OnClick(R.id.btnClear)
+    public void handleClickClear() {
+        fragmentListener.clearList();
     }
 
     private void handleTipChange(int change) {
